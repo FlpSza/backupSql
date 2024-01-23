@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (seu código atual) -->
+</head>
+<body>
+    <h1>Configurações</h1>
+
+    <label for="dia">Dia:</label>
+    <input type="date" id="dia" />
+
+    <label for="horario">Horário:</label>
+    <input type="time" id="horario" />
+
+    <button onclick="salvarConfiguracoes()">Salvar Configurações</button>
+    <button onclick="irParaConfiguracoesBanco()">Configurações do Banco de Dados</button>
+
+    <script>
+        function salvarConfiguracoes() {
+            const dia = document.getElementById('dia').value;
+            const horario = document.getElementById('horario').value;
+
+            // Envia uma mensagem IPC para o processo principal
+            ipc.send('salvar-configuracoes', { dia, horario });
+        }
+
+        function irParaConfiguracoesBanco() {
+            // Envia uma mensagem IPC para o processo principal para abrir o configurador do banco de dados
+            ipc.send('abrir-configuracoes-banco');
+        }
+
+    </script>
+</body>
+</html>

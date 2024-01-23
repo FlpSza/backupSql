@@ -1,0 +1,39 @@
+<!-- configuracoes.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Configurações do Banco de Dados</title>
+</head>
+<body>
+  <h1>Configurações do Banco de Dados</h1>
+  <label for="user">Usuário:</label>
+  <input type="text" id="user" placeholder="Digite o usuário"><br>
+
+  <label for="password">Senha:</label>
+  <input type="password" id="password" placeholder="Digite a senha"><br>
+
+  <label for="host">Host:</label>
+  <input type="text" id="host" placeholder="Digite o host"><br>
+
+  <label for="port">Porta:</label>
+  <input type="text" id="port" placeholder="Digite a porta"><br>
+
+  <label for="database">Banco de Dados:</label>
+  <input type="text" id="database" placeholder="Digite o nome do banco de dados"><br>
+
+  <button onclick="salvarConfiguracoesBanco()">Salvar Configurações do Banco de Dados</button>
+
+  <script>
+    function salvarConfiguracoesBanco() {
+      const user = document.getElementById('user').value;
+      const password = document.getElementById('password').value;
+      const host = document.getElementById('host').value;
+      const port = document.getElementById('port').value;
+      const database = document.getElementById('database').value;
+
+      // Envia uma mensagem IPC para o processo principal
+      ipc.send('salvar-configuracoes-banco', { user, password, host, port, database });
+    }
+  </script>
+</body>
+</html>
