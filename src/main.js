@@ -5,6 +5,7 @@ const schedule = require('node-schedule');
 const { realizarBackup } = require('./criarBackup');
 const fs = require('fs');
 const { Client } = require('pg');
+const moment = require('moment')
 
 require('dotenv').config();
 
@@ -88,6 +89,41 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+}
+
+function criarAgendamento(configuracoes) {
+    if (tarefaAgendada) {
+        tarefaAgendada.cancel();
+    }
+
+    const { dia, horario } = configuracoes;
+
+    // Formatar a data e hora usando moment.js
+    const dataHoraFormatada = moment(`${dia} ${horario}`, 'YYYY-MM-DD HH:mm').format();
+
+    // Insira os dados no banco de dados
+    client.connect();
+    const query = 'INSERT INTO agendamentos (dia, horario) VALUES ($1, $2)';
+    const values = [dia, horario];
+    console.log('Comprimento de dia:', dataHoraFormatada.length);
+    console.log('Comprimento de dia:', horario.length);
+
+
+    client.query(query, values, (err) => {
+        if (err) {
+            console.error('Erro ao inserir dados no banco de dados:', err);
+        } else {
+            console.log('Dados inseridos no banco de dados com sucesso.');
+            console.log('Agendador de backup configurado para:', dataHoraFormatada);
+        }
+
+        client.end();
+    });
+
+    // Agendar a tarefa
+    tarefaAgendada = schedule.scheduleJob(dataHoraFormatada, () => {
+        realizarBackup();
+    });
 }
 
 ipcMain.on('salvar-configuracoes', (event, configuracoes) => {

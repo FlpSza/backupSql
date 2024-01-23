@@ -5,11 +5,11 @@ const execAsync = util.promisify(exec); // Converte exec para uma função que r
 require('dotenv').config();
 
 const client = new Client({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB,
+  user: 'postgres',
+  host: 'localhost',
+  database: 'star_dev',
+  password: '123456',
+  port: '5432',
 });
 
 async function realizarBackup() {
