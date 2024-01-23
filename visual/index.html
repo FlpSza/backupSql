@@ -7,8 +7,16 @@
 <body>
     <h1>Configurações</h1>
 
-    <label for="dia">Dia:</label>
-    <input type="date" id="dia" />
+    <label for="diaSemana">Dia da Semana:</label>
+    <select id="diaSemana">
+        <option value="0">Domingo</option>
+        <option value="1">Segunda-feira</option>
+        <option value="2">Terça-feira</option>
+        <option value="3">Quarta-feira</option>
+        <option value="4">Quinta-feira</option>
+        <option value="5">Sexta-feira</option>
+        <option value="6">Sábado</option>
+    </select>
 
     <label for="horario">Horário:</label>
     <input type="time" id="horario" />
@@ -17,19 +25,19 @@
     <button onclick="irParaConfiguracoesBanco()">Configurações do Banco de Dados</button>
 
     <script>
-        function salvarConfiguracoes() {
-            const dia = document.getElementById('dia').value;
-            const horario = document.getElementById('horario').value;
+    function salvarConfiguracoes() {
+        const diaSemanaSelect = document.getElementById('diaSemana');
+        const diaSemana = diaSemanaSelect.options[diaSemanaSelect.selectedIndex].value;
+        const horario = document.getElementById('horario').value;
 
-            // Envia uma mensagem IPC para o processo principal
-            ipc.send('salvar-configuracoes', { dia, horario });
-        }
+        // Envia uma mensagem IPC para o processo principal
+        ipc.send('salvar-configuracoes', { diaSemana, horario });
+    }
 
-        function irParaConfiguracoesBanco() {
-            // Envia uma mensagem IPC para o processo principal para abrir o configurador do banco de dados
-            ipc.send('abrir-configuracoes-banco');
-        }
-
+    function irParaConfiguracoesBanco() {
+        // Envia uma mensagem IPC para o processo principal para abrir o configurador do banco de dados
+        ipc.send('abrir-configuracoes-banco');
+    }
     </script>
 </body>
 </html>
