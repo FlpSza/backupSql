@@ -1,7 +1,8 @@
 const { Client } = require('pg');
 const { exec } = require('child_process');
-const util = require('util'); // Módulo util para promisify
-const execAsync = util.promisify(exec); // Converte exec para uma função que retorna uma Promise
+const util = require('util');
+const moment = require('moment'); // Importar a biblioteca moment
+const execAsync = util.promisify(exec);
 require('dotenv').config();
 
 const client = new Client({
@@ -18,10 +19,13 @@ async function realizarBackup() {
     await client.connect();
     console.log('Conectado ao PostgreSQL');
 
-    const dataHoraAtual = new Date().toISOString().replace(/[-T:]/g, '');
-    const caminhoBackup = `C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup`;
+    // Formatar a data atual usando moment.js
+    const dataHoraAtual = moment().format('DD-MM-YY_HH-mm-ss');
+    
+    // Construir o caminho de backup com o nome do arquivo contendo a data e hora
+    const caminhoBackup = `C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup/backup_${dataHoraAtual}.sql`;
 
-      const comandoBackup = `"C:/Program Files/PostgreSQL/15/bin/pg_dump.exe" -Ft --no-owner --dbname=postgresql://${client.user}:${client.password}@${client.host}:${client.port}/${client.database} > "C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup/backup.sql"`;
+    const comandoBackup = `"C:/Program Files/PostgreSQL/15/bin/pg_dump.exe" -Ft --no-owner --dbname=postgresql://${client.user}:${client.password}@${client.host}:${client.port}/${client.database} > "${caminhoBackup}"`;
 
     // Executar o comando de backup
     const { stdout, stderr } = await execAsync(comandoBackup);
@@ -43,4 +47,4 @@ async function realizarBackup() {
 
 module.exports = {
   realizarBackup,
-}
+};
