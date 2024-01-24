@@ -7,7 +7,7 @@ require('dotenv').config();
 const client = new Client({
   user: 'postgres',
   host: 'localhost',
-  database: 'star_dev',
+  database: 'db_reembolso',
   password: '123456',
   port: '5432',
 });
@@ -21,7 +21,7 @@ async function realizarBackup() {
     const dataHoraAtual = new Date().toISOString().replace(/[-T:]/g, '');
     const caminhoBackup = `C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup`;
 
-    const comandoBackup = `"C:/Program Files/PostgreSQL/15/bin/pg_dump.exe" --no-owner --dbname=postgresql://postgres:123456@localhost:5432/pdv > "C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup/backup.sql"`;
+    const comandoBackup = `"C:/Program Files/PostgreSQL/15/bin/pg_dump.exe" -Ft --no-owner --dbname=postgresql://postgres:123456@localhost:5432/db_reembolso > "C:/Users/Fellipe Silva/OneDrive/Área de Trabalho/gerarbackup/backup.sql"`;
 
     // Executar o comando de backup
     const { stdout, stderr } = await execAsync(comandoBackup);

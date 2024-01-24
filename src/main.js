@@ -13,7 +13,7 @@ require('dotenv').config();
 const dbConfig = {
     user: 'postgres',
     host: 'localhost',
-    database: 'star_dev',
+    database: 'db_reembolso',
     password: '123456',
     port: '5432',
 };
