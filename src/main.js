@@ -2,7 +2,7 @@
 const { ipcMain, app, BrowserWindow } = require('electron');
 const path = require('path');
 const schedule = require('node-schedule');
-const { realizarBackup } = require('./criarBackup');
+const { realizarBackup, cancelarAgendamentoNoBanco, verificarAgendamentoExistente } = require('./criarBackup');
 const fs = require('fs');
 const { Client } = require('pg');
 const moment = require('moment');
@@ -61,10 +61,6 @@ function createWindow() {
 }
 
 function criarAgendamento(configuracoes) {
-    if (tarefaAgendada) {
-        tarefaAgendada.cancel();
-    }
-
     const { diaSemana, horario } = configuracoes;
 
     // Mapeia o nome do dia para o número correspondente (0 para domingo, 1 para segunda, etc.)
@@ -89,27 +85,52 @@ function criarAgendamento(configuracoes) {
     rule.hour = parseInt(horario.split(':')[0], 10);
     rule.minute = parseInt(horario.split(':')[1], 10);
 
-    // Insere os dados no banco de dados
+    // Verificar se existe um agendamento para o mesmo dia da semana
     client.connect();
-    const query = 'INSERT INTO agendamentos (dia, horario) VALUES ($1, $2)';
-    const values = [diaSemana, horario];
+    const query = 'SELECT * FROM agendamentos WHERE dia = $1 LIMIT 1';
+    const values = [diaSemana];
 
-    client.query(query, values, (err) => {
+    client.query(query, values, async (err, result) => {
         if (err) {
-            console.error('Erro ao inserir dados no banco de dados:', err);
+            console.error('Erro ao verificar agendamento existente:', err);
         } else {
-            console.log('Dados inseridos no banco de dados com sucesso.');
-            console.log('Agendador de backup configurado para:', diaSemana, horario);
+            // Se existir, cancelar o agendamento existente
+            if (result.rows.length > 0) {
+                await cancelarAgendamentoNoBanco(result.rows[0].id);
+            }
+
+            // Desconectar o cliente antes de uma nova tentativa de conexão
+            client.end();
+
+            // Criar um novo cliente para a próxima conexão
+            const novoClient = new Client(dbConfig);
+            novoClient.connect();
+
+            // Insere os dados no banco de dados
+            const insertQuery = 'INSERT INTO agendamentos (dia, horario) VALUES ($1, $2)';
+            const insertValues = [diaSemana, horario];
+
+            novoClient.query(insertQuery, insertValues, (insertErr) => {
+                if (insertErr) {
+                    console.error('Erro ao inserir dados no banco de dados:', insertErr);
+                } else {
+                    console.log('Dados inseridos no banco de dados com sucesso.');
+                    console.log('Agendador de backup configurado para:', diaSemana, horario);
+                }
+
+                // Desconectar o novo cliente
+                novoClient.end();
+            });
+
+            // Agenda a tarefa
+            tarefaAgendada = schedule.scheduleJob(rule, () => {
+                realizarBackup();
+            });
         }
-
-        client.end();
-    });
-
-    // Agenda a tarefa
-    tarefaAgendada = schedule.scheduleJob(rule, () => {
-        realizarBackup();
     });
 }
+
+
 
 ipcMain.on('salvar-configuracoes', (event, configuracoes) => {
     criarAgendamento(configuracoes);
