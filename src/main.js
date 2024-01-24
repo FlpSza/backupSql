@@ -11,11 +11,11 @@ require('dotenv').config();
 
 // Configurações da conexão com o PostgreSQL
 const dbConfig = {
-    user: 'postgres',
-    host: 'localhost',
-    database: 'db_reembolso',
-    password: '123456',
-    port: '5432',
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    port: process.env.PORT,
 };
 
 const client = new Client(dbConfig);
