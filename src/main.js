@@ -84,7 +84,7 @@ function createWindow() {
 }
 
 //Funcao para criar agendamento no banco de dados
-function criarAgendamento(configuracoes) {
+async function criarAgendamento(configuracoes) {
     const { diaSemana, horario } = configuracoes;
 
     // Mapeia o nome do dia para o número correspondente (0 para domingo, 1 para segunda, etc.)
@@ -109,50 +109,68 @@ function criarAgendamento(configuracoes) {
     rule.hour = parseInt(horario.split(':')[0], 10);
     rule.minute = parseInt(horario.split(':')[1], 10);
 
-    // Verificar se existe um agendamento para o mesmo dia da semana
-    client.connect();
-    const query = 'SELECT * FROM agendamentos WHERE dia = $1 LIMIT 1';
+    // Cria um novo cliente para cada agendamento
+    const novoClient = new Client(dbConfig);
+
+    try {
+        // Conectar ao banco de dados
+        await novoClient.connect();
+
+        // Verificar se existe um agendamento para o mesmo dia da semana
+        const query = 'SELECT * FROM agendamentos WHERE dia = $1 LIMIT 1';
+        const values = [diaSemana];
+
+        const result = await novoClient.query(query, values);
+
+        if (result.rows.length > 0) {
+            await cancelarAgendamentoNoBanco(result.rows[0].id);
+        }
+
+        // Insere os dados no banco de dados
+        const insertQuery = 'INSERT INTO agendamentos (dia, horario) VALUES ($1, $2)';
+        const insertValues = [diaSemana, horario];
+
+        await novoClient.query(insertQuery, insertValues);
+
+        console.log('Dados inseridos no banco de dados com sucesso.');
+        console.log('Agendador de backup configurado para:', diaSemana, horario);
+
+        // Agenda a tarefa
+        tarefaAgendada = schedule.scheduleJob(rule, () => {
+            realizarBackup();
+        });
+    } catch (error) {
+        console.error('Erro ao criar agendamento:', error);
+    } finally {
+        // Certifique-se de desconectar o cliente, mesmo se ocorrer um erro
+        await novoClient.end();
+    }
+}
+
+// IPC para excluir o agendamento do banco de dados
+ipcMain.on('excluir-agendamento', (event, { diaSemana }) => {
+    // Criar um novo cliente para cada consulta
+    const novoClient = new Client(dbConfig);
+
+    // Conectar ao banco de dados
+    novoClient.connect();
+
+    // Query para excluir o agendamento para o dia selecionado
+    const query = 'DELETE FROM agendamentos WHERE dia = $1';
     const values = [diaSemana];
 
-    client.query(query, values, async (err, result) => {
+    novoClient.query(query, values, (err) => {
         if (err) {
-            console.error('Erro ao verificar agendamento existente:', err);
+            console.error('Erro ao excluir o agendamento:', err);
+            event.reply('agendamento-excluido', { error: 'Erro ao excluir o agendamento.' });
         } else {
-            // Se existir, cancelar o agendamento existente
-            if (result.rows.length > 0) {
-                await cancelarAgendamentoNoBanco(result.rows[0].id);
-            }
-
-            // Desconectar o cliente antes de uma nova tentativa de conexão
-            client.end();
-
-            // Criar um novo cliente para a próxima conexão
-            const novoClient = new Client(dbConfig);
-            novoClient.connect();
-
-            // Insere os dados no banco de dados
-            const insertQuery = 'INSERT INTO agendamentos (dia, horario) VALUES ($1, $2)';
-            const insertValues = [diaSemana, horario];
-
-            novoClient.query(insertQuery, insertValues, (insertErr) => {
-                if (insertErr) {
-                    console.error('Erro ao inserir dados no banco de dados:', insertErr);
-                } else {
-                    console.log('Dados inseridos no banco de dados com sucesso.');
-                    console.log('Agendador de backup configurado para:', diaSemana, horario);
-                }
-
-                // Desconectar o novo cliente
-                novoClient.end();
-            });
-
-            // Agenda a tarefa
-            tarefaAgendada = schedule.scheduleJob(rule, () => {
-                realizarBackup();
-            });
+            event.reply('agendamento-excluido', { success: true });
         }
+
+        // Desconectar do banco de dados após a consulta
+        novoClient.end();
     });
-}
+});
 
 // IPC para buscar o horário agendado no banco de dados
 ipcMain.on('buscar-horario-agendado', (event, diaSemana) => {
