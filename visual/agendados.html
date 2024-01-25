@@ -11,6 +11,7 @@
 
         <label for="agendado">Selecione o Dia da Semana:</label>
         <select id="agendado" onchange="buscarHorarioAgendado()">
+            <option value="selecionar">Selecionar</option>
             <option value="domingo">Domingo</option>
             <option value="segunda">Segunda-feira</option>
             <option value="terca">Terça-feira</option>
@@ -22,7 +23,7 @@
 
         <p>Horário Agendado: <span id="horarioAgendado">N/A</span></p>
 
-        <button class="btn btn-primary btn-sm" onclick="modificarAgendamento()">Modificar</button>
+        <!-- <button class="btn btn-primary btn-sm" onclick="modificarAgendamento()">Modificar</button> -->
         <button class="btn btn-danger btn-sm" onclick="excluirAgendamento()">Excluir</button>
 
         <script>
