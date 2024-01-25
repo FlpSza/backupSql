@@ -21,9 +21,9 @@ const dbConfig = {
 const client = new Client(dbConfig);
 
 let mainWindow;
-let tarefaAgendada;
 let outraJanela;
 
+//Abrir janela de observação de horarios agendados
 ipcMain.on('abrir-outra-janela', () => {
     // Verifica se a janela já está aberta
     if (!outraJanela) {
@@ -40,11 +40,11 @@ ipcMain.on('abrir-outra-janela', () => {
 
         // Lidar com o fechamento da janela
         outraJanela.on('closed', () => {
-            outraJanela = null;
         });
     }
 });
 
+//Abrir janela de configuracao do banco de dados
 function criarJanelaConfiguracoesBanco() {
     const configuracoesBancoWindow = new BrowserWindow({
         width: 600,
@@ -61,6 +61,7 @@ function criarJanelaConfiguracoesBanco() {
     });
 }
 
+//Abrir janela principal
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -82,6 +83,7 @@ function createWindow() {
     });
 }
 
+//Funcao para criar agendamento no banco de dados
 function criarAgendamento(configuracoes) {
     const { diaSemana, horario } = configuracoes;
 
@@ -153,12 +155,13 @@ function criarAgendamento(configuracoes) {
 }
 
 
-
+//Salva agendamento e envia informação para front
 ipcMain.on('salvar-configuracoes', (event, configuracoes) => {
     criarAgendamento(configuracoes);
     console.log('Configurações salvas:', configuracoes);
 });
 
+//Salva dados do banco de dados no .env
 ipcMain.on('salvar-configuracoes-banco', (event, configuracoes) => {
     console.log('Configurações do Banco salvas:', configuracoes);
 
@@ -169,10 +172,12 @@ ipcMain.on('salvar-configuracoes-banco', (event, configuracoes) => {
     fs.writeFileSync(path.join(__dirname, '../.env'), envContent, 'utf-8');
 });
 
+//Abre Janela de configurações
 ipcMain.on('abrir-configuracoes-banco', () => {
     criarJanelaConfiguracoesBanco();
 });
 
+//Abre Janela Main
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
