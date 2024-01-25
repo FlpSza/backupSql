@@ -22,6 +22,28 @@ const client = new Client(dbConfig);
 
 let mainWindow;
 let tarefaAgendada;
+let outraJanela;
+
+ipcMain.on('abrir-outra-janela', () => {
+    // Verifica se a janela já está aberta
+    if (!outraJanela) {
+        // Se não estiver aberta, cria uma nova janela
+        outraJanela = new BrowserWindow({
+            width: 800,
+            height: 600,
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js')
+            }
+        });
+
+        outraJanela.loadFile(path.join(__dirname, '../visual/agendados.html'));
+
+        // Lidar com o fechamento da janela
+        outraJanela.on('closed', () => {
+            outraJanela = null;
+        });
+    }
+});
 
 function criarJanelaConfiguracoesBanco() {
     const configuracoesBancoWindow = new BrowserWindow({
@@ -155,7 +177,6 @@ app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-        app.quit();
     }
 });
 

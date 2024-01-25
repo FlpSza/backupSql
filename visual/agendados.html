@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações de Agendamento</title>
+</head>
+<body>
+    <h1>Configurações de Agendamento</h1>
+
+    <label for="agendado">Selecione o Dia da Semana:</label>
+    <select id="agendado" onchange="buscarHorarioAgendado()">
+        <option value="domingo">Domingo</option>
+        <option value="segunda">Segunda-feira</option>
+        <option value="terca">Terça-feira</option>
+        <option value="quarta">Quarta-feira</option>
+        <option value="quinta">Quinta-feira</option>
+        <option value="sexta">Sexta-feira</option>
+        <option value="sabado">Sábado</option>
+    </select>
+
+    <p>Horário Agendado: <span id="horarioAgendado">N/A</span></p>
+
+    <button class="btn btn-primary btn-sm" onclick="modificarAgendamento()">Modificar</button>
+    <button class="btn btn-danger btn-sm" onclick="excluirAgendamento()">Excluir</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+    
+        // Função para buscar o horário agendado
+        function buscarHorarioAgendado() {
+            const diaAgendado = document.getElementById('agendado').value;
+            // Envia uma mensagem para o processo principal (main.js) para buscar o horário
+            ipcRenderer.send('buscar-horario-agendado', diaAgendado);
+        }
+    
+        // Função para modificar o agendamento
+        function modificarAgendamento() {
+            const diaAgendado = document.getElementById('agendado').value;
+            // Envia uma mensagem para o processo principal (main.js) para modificar o agendamento
+            ipcRenderer.send('modificar-agendamento', diaAgendado);
+        }
+    
+        // Função para excluir o agendamento
+        function excluirAgendamento() {
+            const diaAgendado = document.getElementById('agendado').value;
+            // Envia uma mensagem para o processo principal (main.js) para excluir o agendamento
+            ipcRenderer.send('excluir-agendamento', diaAgendado);
+        }
+    
+        // Receber a resposta do processo principal (main.js) sobre o horário agendado
+        ipcRenderer.on('horario-agendado', (event, { dia, horario }) => {
+            console.log(`Horário agendado para ${dia}: ${horario}`);
+            // Atualizar o conteúdo com o horário agendado
+            document.getElementById('horarioAgendado').textContent = `Horário Agendado: ${horario}`;
+        });
+    
+        // Executar a função buscarHorarioAgendado quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            buscarHorarioAgendado();
+        });
+    </script>
+    
+</body>
+</html>

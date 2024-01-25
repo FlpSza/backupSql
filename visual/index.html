@@ -24,6 +24,7 @@
 
     <button onclick="salvarConfiguracoes()">Salvar Configurações</button>
     <button onclick="irParaConfiguracoesBanco()">Configurações do Banco de Dados</button>
+    <button onclick="abrirOutraJanela()">Abrir Outra Janela</button>
 
     <script>
         function salvarConfiguracoes() {
@@ -38,6 +39,11 @@
         function irParaConfiguracoesBanco() {
             // Envia uma mensagem IPC para o processo principal para abrir o configurador do banco de dados
             ipc.send('abrir-configuracoes-banco');
+        }
+
+        function abrirOutraJanela() {
+            // Envia uma mensagem IPC para o processo principal para abrir outra janela
+            ipc.send('abrir-outra-janela');
         }
     </script>
 </body>
