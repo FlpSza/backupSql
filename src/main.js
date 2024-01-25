@@ -154,6 +154,34 @@ function criarAgendamento(configuracoes) {
     });
 }
 
+// IPC para buscar o horário agendado no banco de dados
+ipcMain.on('buscar-horario-agendado', (event, diaSemana) => {
+    // Conectar ao banco de dados
+    client.connect();
+
+    // Query para obter o horário agendado para o dia selecionado
+    const query = 'SELECT horario FROM agendamentos WHERE dia = $1 LIMIT 1';
+    const values = [diaSemana];
+
+    client.query(query, values, (err, result) => {
+        if (err) {
+            console.error('Erro ao buscar horário agendado:', err);
+            event.reply('horario-agendado', 'Erro ao buscar horário.');
+        } else {
+            // Enviar o horário agendado de volta para a interface do usuário
+            if (result.rows.length > 0) {
+                const horarioAgendado = result.rows[0].horario;
+                event.reply('horario-agendado', horarioAgendado);
+            } else {
+                event.reply('horario-agendado', 'N/A');
+            }
+        }
+
+        // Desconectar do banco de dados
+        client.end();
+    });
+});
+
 
 //Salva agendamento e envia informação para front
 ipcMain.on('salvar-configuracoes', (event, configuracoes) => {
