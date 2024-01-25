@@ -156,14 +156,17 @@ function criarAgendamento(configuracoes) {
 
 // IPC para buscar o horário agendado no banco de dados
 ipcMain.on('buscar-horario-agendado', (event, diaSemana) => {
+    // Criar um novo cliente para cada consulta
+    const novoClient = new Client(dbConfig);
+
     // Conectar ao banco de dados
-    client.connect();
+    novoClient.connect();
 
     // Query para obter o horário agendado para o dia selecionado
     const query = 'SELECT horario FROM agendamentos WHERE dia = $1 LIMIT 1';
     const values = [diaSemana];
 
-    client.query(query, values, (err, result) => {
+    novoClient.query(query, values, (err, result) => {
         if (err) {
             console.error('Erro ao buscar horário agendado:', err);
             event.reply('horario-agendado', 'Erro ao buscar horário.');
@@ -177,8 +180,8 @@ ipcMain.on('buscar-horario-agendado', (event, diaSemana) => {
             }
         }
 
-        // Desconectar do banco de dados
-        client.end();
+        // Desconectar do banco de dados após a consulta
+        novoClient.end();
     });
 });
 
