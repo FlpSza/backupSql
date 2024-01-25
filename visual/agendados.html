@@ -26,40 +26,7 @@
     <button class="btn btn-danger btn-sm" onclick="excluirAgendamento()">Excluir</button>
 
     <script>
-        const { ipcRenderer } = require('electron');
-    
-        // Função para buscar o horário agendado
-        function buscarHorarioAgendado() {
-            const diaAgendado = document.getElementById('agendado').value;
-            // Envia uma mensagem para o processo principal (main.js) para buscar o horário
-            ipcRenderer.send('buscar-horario-agendado', diaAgendado);
-        }
-    
-        // Função para modificar o agendamento
-        function modificarAgendamento() {
-            const diaAgendado = document.getElementById('agendado').value;
-            // Envia uma mensagem para o processo principal (main.js) para modificar o agendamento
-            ipcRenderer.send('modificar-agendamento', diaAgendado);
-        }
-    
-        // Função para excluir o agendamento
-        function excluirAgendamento() {
-            const diaAgendado = document.getElementById('agendado').value;
-            // Envia uma mensagem para o processo principal (main.js) para excluir o agendamento
-            ipcRenderer.send('excluir-agendamento', diaAgendado);
-        }
-    
-        // Receber a resposta do processo principal (main.js) sobre o horário agendado
-        ipcRenderer.on('horario-agendado', (event, { dia, horario }) => {
-            console.log(`Horário agendado para ${dia}: ${horario}`);
-            // Atualizar o conteúdo com o horário agendado
-            document.getElementById('horarioAgendado').textContent = `Horário Agendado: ${horario}`;
-        });
-    
-        // Executar a função buscarHorarioAgendado quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', () => {
-            buscarHorarioAgendado();
-        });
+
     </script>
     
 </body>
