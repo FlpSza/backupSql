@@ -1,4 +1,3 @@
-<!-- configuracoes.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,15 +23,21 @@
   <button onclick="salvarConfiguracoesBanco()">Salvar Configurações do Banco de Dados</button>
 
   <script>
-    function salvarConfiguracoesBanco() {
-      const user = document.getElementById('user').value;
-      const password = document.getElementById('password').value;
-      const host = document.getElementById('host').value;
-      const port = document.getElementById('port').value;
-      const database = document.getElementById('database').value;
+    window.onload = function() {
+      fetch('http://localhost:3000/config') // Substitua 3000 pela porta do seu servidor, se necessário
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('user').placeholder = data.user;
+           document.getElementById('password').placeholder = data.password;
+          document.getElementById('host').placeholder = data.host;
+          document.getElementById('port').placeholder = data.port;
+          document.getElementById('database').placeholder = data.database;
+        })
+        .catch(error => console.log('Erro ao carregar configurações:', error));
+    };
 
-      // Envia uma mensagem IPC para o processo principal
-      ipc.send('salvar-configuracoes-banco', { user, password, host, port, database });
+    function salvarConfiguracoesBanco() {
+
     }
   </script>
 </body>
