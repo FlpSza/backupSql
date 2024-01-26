@@ -4,7 +4,7 @@
   "description": "",
   "main": "conexao.js",
   "scripts": {
-    "start": "electron src/main.js"
+    "start": "electron src/main.js && node src/server.js"
   },
   "keywords": [],
   "author": "",
