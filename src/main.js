@@ -6,6 +6,7 @@ const { realizarBackup, cancelarAgendamentoNoBanco, verificarAgendamentoExistent
 const fs = require('fs');
 const { Client } = require('pg');
 const moment = require('moment');
+const { spawn } = require('child_process');
 
 require('dotenv').config();
 
@@ -63,6 +64,23 @@ function criarJanelaConfiguracoesBanco() {
 
 //Abrir janela principal
 function createWindow() {
+
+  // Inicia o servidor Node.js/Express
+  const serverProcess = spawn('node', [path.join(__dirname, 'server.js')]);
+
+  // Redireciona a saída para o console do Electron
+  serverProcess.stdout.on('data', (data) => {
+    console.log(`Servidor: ${data}`);
+  });
+
+  serverProcess.stderr.on('data', (data) => {
+    console.error(`Erro do servidor: ${data}`);
+  });
+
+  serverProcess.on('close', (code) => {
+    console.log(`Servidor encerrado com código: ${code}`);
+  });
+
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -79,7 +97,6 @@ function createWindow() {
     }
 
     mainWindow.on('closed', () => {
-        mainWindow = null;
     });
 }
 
