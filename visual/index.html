@@ -4,6 +4,48 @@
 <head>
     <!-- ... (seu código atual) -->
 </head>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    select, input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    #positionButton {
+      text-align: center;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+  </style>
 <body>
     <h1>Configurações</h1>
 
@@ -21,10 +63,11 @@
 
     <label for="horario">Horário:</label>
     <input type="time" id="horario" />
-
+    <div id="positionButton">
     <button onclick="salvarConfiguracoes()">Salvar Configurações</button>
     <button onclick="irParaConfiguracoesBanco()">Configurações do Banco de Dados</button>
-    <button onclick="abrirOutraJanela()">Abrir Outra Janela</button>
+    <button onclick="abrirOutraJanela()">Horários agendados</button>
+    </div>
 
     <script>
         function salvarConfiguracoes() {

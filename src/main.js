@@ -30,11 +30,14 @@ ipcMain.on('abrir-outra-janela', () => {
     if (!outraJanela) {
         // Se não estiver aberta, cria uma nova janela
         outraJanela = new BrowserWindow({
+            icon: './img/icon.ico',
             width: 800,
             height: 600,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js')
-            }
+            },
+            autoHideMenuBar: true,
+            title: "Gerar backup"
         });
 
         outraJanela.loadFile(path.join(__dirname, '../visual/agendados.html'));
@@ -48,11 +51,14 @@ ipcMain.on('abrir-outra-janela', () => {
 //Abrir janela de configuracao do banco de dados
 function criarJanelaConfiguracoesBanco() {
     const configuracoesBancoWindow = new BrowserWindow({
+        icon: './img/icon.ico',
         width: 600,
         height: 400,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
-        }
+        },
+        autoHideMenuBar: true,
+        title: "Gerar backup"
     });
 
     configuracoesBancoWindow.loadFile(path.join(__dirname, '../visual/configuraçoes.html'));
@@ -82,11 +88,14 @@ function createWindow() {
   });
 
     mainWindow = new BrowserWindow({
+        icon: './img/icon.ico',
         width: 800,
         height: 600,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
-        }
+        },
+        autoHideMenuBar: true,
+        title: "Gerar backup"
     });
 
     mainWindow.loadFile(path.join(__dirname, '../visual/index.html'));
