@@ -39,8 +39,6 @@ async function realizarBackup() {
   } catch (error) {
     console.error(`Erro durante a execução do backup: ${error.message}`);
   } finally {
-    // Sempre desconectar, mesmo em caso de erro
-    await client.end();
     console.log('Conexão encerrada');
   }
 }
@@ -67,7 +65,6 @@ async function verificarAgendamentoExistente(dia) {
     console.error('Erro ao verificar agendamento existente:', err);
     return null;
   } finally {
-    await client.end();
   }
 }
 
@@ -92,7 +89,6 @@ async function cancelarAgendamentoNoBanco(agendamentoId) {
   } catch (err) {
     console.error('Erro ao cancelar agendamento existente:', err);
   } finally {
-    await client.end();
   }
 }
 

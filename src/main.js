@@ -1,5 +1,5 @@
 // src/main.js
-const { ipcMain, app, BrowserWindow } = require('electron');
+const { ipcMain, app, BrowserWindow, Tray, Menu } = require('electron');
 const path = require('path');
 const schedule = require('node-schedule');
 const { realizarBackup, cancelarAgendamentoNoBanco, verificarAgendamentoExistente } = require('./criarBackup');
@@ -23,30 +23,32 @@ const client = new Client(dbConfig);
 
 let mainWindow;
 let outraJanela;
+let tray;
 
 //Abrir janela de observação de horarios agendados
 ipcMain.on('abrir-outra-janela', () => {
-    // Verifica se a janela já está aberta
-    if (!outraJanela) {
-        // Se não estiver aberta, cria uma nova janela
-        outraJanela = new BrowserWindow({
-            icon: './img/icon.ico',
-            width: 800,
-            height: 600,
-            webPreferences: {
-                preload: path.join(__dirname, 'preload.js')
-            },
-            autoHideMenuBar: true,
-            title: "Gerar backup"
-        });
-
-        outraJanela.loadFile(path.join(__dirname, '../visual/agendados.html'));
-
-        // Lidar com o fechamento da janela
-        outraJanela.on('closed', () => {
-        });
-    }
+    criarJanelaAgendados();
 });
+
+//Abrir Janela Agendados
+function criarJanelaAgendados () {
+   const outraJanela = new BrowserWindow({
+        icon: './img/icon.ico',
+        width: 800,
+        height: 600,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        },
+        autoHideMenuBar: true,
+        title: "Gerar backup"
+    });
+
+    outraJanela.loadFile(path.join(__dirname, '../visual/agendados.html'));
+
+    // Lidar com o fechamento da janela
+    outraJanela.on('closed', () => {
+    });
+};
 
 //Abrir janela de configuracao do banco de dados
 function criarJanelaConfiguracoesBanco() {
@@ -87,6 +89,16 @@ function createWindow() {
     console.log(`Servidor encerrado com código: ${code}`);
   });
 
+  tray = new Tray(path.join(__dirname, '../img/icon.ico'));
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Abrir', click: () => mainWindow.show() },
+    { label: 'Fechar', click: () => app.quit() },
+  ]);
+
+  tray.setToolTip('Gerenciador de backup');
+  tray.setContextMenu(contextMenu);
+
     mainWindow = new BrowserWindow({
         icon: './img/icon.ico',
         width: 800,
@@ -105,8 +117,16 @@ function createWindow() {
         mainWindow.webContents.openDevTools();
     }
 
-    mainWindow.on('closed', () => {
-    });
+  // Minimiza a janela para a bandeja do sistema ao clicar no botão de fechar
+  mainWindow.on('close', (event) => {
+    event.preventDefault();
+    mainWindow.hide();
+  });
+      
+  // Reabre a janela principal quando o ícone na bandeja é clicado
+  tray.on('click', () => {
+    mainWindow.show();
+  });
 }
 
 //Funcao para criar agendamento no banco de dados
@@ -168,8 +188,7 @@ async function criarAgendamento(configuracoes) {
     } catch (error) {
         console.error('Erro ao criar agendamento:', error);
     } finally {
-        // Certifique-se de desconectar o cliente, mesmo se ocorrer um erro
-        await novoClient.end();
+
     }
 }
 
@@ -193,8 +212,6 @@ ipcMain.on('excluir-agendamento', (event, { diaSemana }) => {
             event.reply('agendamento-excluido', { success: true });
         }
 
-        // Desconectar do banco de dados após a consulta
-        novoClient.end();
     });
 });
 
@@ -224,8 +241,6 @@ ipcMain.on('buscar-horario-agendado', (event, diaSemana) => {
             }
         }
 
-        // Desconectar do banco de dados após a consulta
-        novoClient.end();
     });
 });
 
